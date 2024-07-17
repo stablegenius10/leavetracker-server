@@ -20,6 +20,22 @@ app.get("/leave-history", async (req, res) => {
   }
 });
 
+// Define the DELETE endpoint for deleting a leave entry
+app.delete("/api/delete-leave-entry/:id", async (req, res) => {
+  const entryId = req.params.id;
+  try {
+    const deletedEntry = await Leave.findByIdAndDelete(entryId);
+    if (deletedEntry) {
+      res.json({ message: "Leave entry deleted successfully" });
+    } else {
+      res.status(404).json({ error: "Leave entry not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting leave entry:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.post("/submit", async (req, res) => {
   const leave = new Leave({
     employeeName: req.body.employeeName,
