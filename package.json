@@ -10,9 +10,9 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "npm build"
+    "dev": "nodemon server.js"
   },
-  "name": "0",
+  "name": "leave-tracker",
   "version": "1.0.0",
   "main": "server.js",
   "repository": {
@@ -25,5 +25,5 @@
     "url": "https://github.com/stablegenius10/leavetracker/issues"
   },
   "homepage": "https://github.com/stablegenius10/leavetracker#readme",
-  "description": ""
+  "description": "Leave tracking application"
 }
