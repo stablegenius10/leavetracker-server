@@ -1,22 +1,46 @@
 const express = require("express");
-require("./db");
+const dbConnect = require("./db");
+require("dotenv").config();
 const cors = require("cors");
 const Leave = require("./leaveSchema");
 const app = express();
+
 app.use(cors());
-// parse requests of content-type - application/json
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
+
+// Database connection
+dbConnect();
 
 // Define the GET endpoint for fetching leave history
-app.get("/leave-history", async (req, res) => {
+app.get("/api/leave-history", async (req, res) => {
   try {
     const leaveHistory = await Leave.find();
     res.json(leaveHistory);
   } catch (error) {
-    console.error('Error fetching leave history:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching leave history:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Define the PUT endpoint for updating the approval status of a single leave entry
+app.put("/api/update-approval-status/:id", async (req, res) => {
+  const entryId = req.params.id;
+  const newStatus = req.body.approvalStatus;
+  try {
+    const updatedEntry = await Leave.findByIdAndUpdate(
+      entryId,
+      { approvalStatus: newStatus },
+      { new: true }
+    );
+    if (updatedEntry) {
+      res.json(updatedEntry);
+    } else {
+      res.status(404).json({ error: "Leave entry not found" });
+    }
+  } catch (error) {
+    console.error("Error updating approval status:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -36,7 +60,8 @@ app.delete("/api/delete-leave-entry/:id", async (req, res) => {
   }
 });
 
-app.post("/submit", async (req, res) => {
+// Define the POST endpoint for submitting a leave application
+app.post("/api/submit", async (req, res) => {
   const leave = new Leave({
     employeeName: req.body.employeeName,
     leaveType: req.body.leaveType,
@@ -54,9 +79,13 @@ app.post("/submit", async (req, res) => {
   }
 });
 
+// Default route
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-app.listen(process.env.PORT || 3000, () =>
-  console.log("Server is running on http://localhost:3000")
-);
+
+// Use port from environment variable or default to 8800
+const PORT = process.env.PORT || 8800;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
+});
